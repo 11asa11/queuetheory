@@ -160,7 +160,6 @@ class Lab():
             z_average.insert( iter, round((self.array_of_z[i] + self.array_of_z[i+1])/2, 2) )
             iter += 1
 
-        #print("z_average: " + str(z_average))
         return z_average
 
     def compute_f_ksi_z(self, z_average):
@@ -171,12 +170,9 @@ class Lab():
             f_ksi.insert(iter, f_ksi_i)
             iter += 1
 
-        #print("f_ksi: " + str(f_ksi))
         return f_ksi
 
     def print_arrays_for_second_part(self):
-        #print("y: [", end="")
-
         y_iter = 0
         for y in self.array_of_y:
             if y_iter != (len(self.array_of_y) - 1):
@@ -201,7 +197,7 @@ class Lab():
 
     def create_histogram_first_case(self):
         param_m = int(1.44 * log(self.param_n) + 1)
-        #print(param_m)
+
         bins = plt.hist(self.array_of_y, bins = param_m, density=True, range = (0,max(self.array_of_y)))
         #sns.histplot(data=self.array_of_y, bins=param_m, stat='density')
         iter = 0
@@ -211,7 +207,6 @@ class Lab():
 
         self.compute_l_array()
         self.compute_f_array()
-        #self.print_arrays_for_second_part()
 
         z_average = self.compute_z_average()
         f_ksi_z = self.compute_f_ksi_z(z_average)
@@ -226,7 +221,7 @@ class Lab():
         bins_razr = np.interp(np.linspace(0, self.param_n, param_m + 1),
                          np.arange(self.param_n),
                          np.sort(self.array_of_y))
-        #print(bins_razr)
+
         bins = plt.hist(self.array_of_y, bins=bins_razr, density=True)
 
         iter = 0
@@ -273,7 +268,7 @@ class Lab():
         self.fourth_case_of_bins()
         self.compute_l_array()
         self.compute_f_array()
-        #self.print_arrays_for_second_part()
+
         self.create_histogram_fourth_case()
 
     def third_part(self):
@@ -281,9 +276,8 @@ class Lab():
         print("Рассматривается гипотеза H0 случайной велечины, распределенной по показательному распределению с")
         print("lamda = " + str(self.param_lambda) + " и r = " + str(r) + " степенями свободы")
         R_0 = 0
-        #print(r)
+
         for i in range(len(self.array_of_l)):
-            #print("counter of i: " + str(i) + ". l[i]: " + str(self.array_of_l[i]) + ". z[i]: " + str(self.array_of_z[i]) + ". z[i+1]: " + str(self.array_of_z[i+1]))
             p_i = (1 - exp(-self.param_lambda * self.array_of_z[i + 1])) - (
                         1 - exp(-self.param_lambda * self.array_of_z[i]))
             R_0 += ((self.array_of_l[i] - self.param_n * p_i) ** 2) / (self.param_n * p_i)
@@ -311,8 +305,6 @@ class Lab():
             self.intervals.insert(i, round(current_value, 2))
             current_value += self.t_zero
 
-        #print("count_of_intervals: " + str(round(self.m_count_of_intervals, 2)))
-        #print("intervals: " + str(intervals))
         return self.intervals
 
     def count_points(self, intervals):
@@ -325,18 +317,12 @@ class Lab():
                     count += 1
             array_of_counts.insert(i, count)
 
-        #print("array_of_counts: " + str(array_of_counts))
-
         set_of_counts = set(array_of_counts)
         self.n_count_table = dict.fromkeys(set_of_counts, 0)
         for count in array_of_counts:
             self.n_count_table[count] += 1
 
         self.k = max(set_of_counts)
-
-        #print("self.k = " + str(self.k))
-        #print("set_of_counts: " + str(set_of_counts))
-        #print("dict_table: " + str(self.n_count_table))
 
     def fourth_part_print_table(self):
         print("tau:      ", end=" ")
@@ -360,7 +346,6 @@ class Lab():
 
         R_0 = 0
         for i in range(self.k + 1):
-            #print("counter of i: " + str(i))
             p_i = exp(-self.param_lambda*self.t_zero) * (self.param_lambda * self.t_zero)**i * (1/(factorial(i)))
 
             n_i = 0
