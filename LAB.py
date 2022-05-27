@@ -10,14 +10,13 @@ def toFixed(numObj, digits=0):
     return f"{numObj:.{digits}f}"
 
 class Lab():
-    def __init__(self):
-        self.param_lambda = float(input("Введите параметр лямбда: "))
-        self.param_n      = int(input("Введите параметр n: "))
+    def __init__(self, lambda_var = None, n = None, y = None):
 
         # For 1st part
-        self.array_of_x   = []
         self.array_of_y   = []
         self.array_of_tau = []
+
+        self.__init_vars(lambda_var = lambda_var, n = n, y = y)
 
         # For 2nd part
         self.array_of_z = []
@@ -30,10 +29,6 @@ class Lab():
         self.k             = None
         self.n_count_table = dict()
 
-        self.__fill_arrays_randomly()
-        self.__print_arrays()
-        print()
-
     def __fill_arrays_randomly(self):
         iter = 0
         tau_iter = 0
@@ -41,7 +36,6 @@ class Lab():
             x_iter = random.random()
             y_iter = -(log(1 - x_iter)) / self.param_lambda
             tau_iter += y_iter
-            self.array_of_x.insert(iter, x_iter)
             self.array_of_y.insert(iter, y_iter)
             self.array_of_tau.insert(iter, tau_iter)
             iter += 1
@@ -56,11 +50,6 @@ class Lab():
                 count_of_symb= int(input(
                     "Введите число знаков после запятой: "))
 
-            print("x:  ", end =" ")
-            for x in self.array_of_x:
-                print(toFixed(x, count_of_symb), end =" ")
-            print()
-
             print("y:  ", end =" ")
             for y in self.array_of_y:
                 print(toFixed(y, count_of_symb), end =" ")
@@ -70,6 +59,34 @@ class Lab():
             for tau in self.array_of_tau:
                 print(toFixed(tau, count_of_symb), end =" ")
             print()
+
+    def __init_vars_manually(self):
+        self.param_lambda = float(input("Введите параметр лямбда: "))
+        self.param_n      = int(input("Введите параметр n: "))
+
+        self.__fill_arrays_randomly()
+
+    def __init_vars_by_input_data(self, lambda_var, n, y):
+        self.param_lambda = lambda_var
+        self.param_n = n
+        self.array_of_y = y
+
+        tau_iter = 0
+        for i in range(self.param_n):
+            tau_iter += self.array_of_y[i]
+            self.array_of_tau.append(tau_iter)
+
+        print("Параметр лямбда: " + str(self.param_lambda))
+        print("Параметр n: " + str(self.param_n))
+
+    def __init_vars(self, lambda_var = None, n = None, y = None):
+        if lambda_var and n and y:
+            self.__init_vars_by_input_data(lambda_var, n, y)
+        elif not lambda_var and not n and not y:
+            self.__init_vars_manually()
+
+        self.__print_arrays()
+        print()
 
     def sort_y(self):
         self.array_of_y.sort()
@@ -115,7 +132,6 @@ class Lab():
         self.array_of_f.clear()
 
     def first_case_of_bins(self):
-        """
         param_m = 1.44 * log(self.param_n) + 1
 
         average_length_between_z = round(float(input("Введите длину разряда: ")), 2)
@@ -125,7 +141,6 @@ class Lab():
             self.array_of_z.insert(z_iter, round(current_z_value, 2))
             z_iter += 1
             current_z_value += round(average_length_between_z, 2)
-        """
 
     def fourth_case_of_bins(self):
         print("Введите диапазоны разрядов, не считая 0")
@@ -222,7 +237,9 @@ class Lab():
                          np.arange(self.param_n),
                          np.sort(self.array_of_y))
 
-        bins = plt.hist(self.array_of_y, bins=bins_razr, density=True)
+        bins_razr[0] = 0.0
+
+        bins = plt.hist(self.array_of_y, bins=bins_razr, range = (0, max(self.array_of_y)), density=True)
 
         iter = 0
         for ranges in bins[1]:
@@ -235,6 +252,44 @@ class Lab():
         z_average = self.compute_z_average()
         f_ksi_z = self.compute_f_ksi_z(z_average)
         plt.plot(z_average, f_ksi_z, color = "red")
+
+        self.compute_mery(f_ksi_z)
+
+        plt.show()
+
+    def create_histogram_third_case(self):
+        param_m = int(1.44 * log(self.param_n) + 1)
+        bins_razr = np.interp(np.linspace(0, self.param_n, param_m + 1),
+                              np.arange(self.param_n),
+                              np.sort(self.array_of_y))
+
+        bins_razr[0] = 0.0
+
+        bins_razr_new = []
+        for bin in bins_razr:
+            bins_razr_new.append(bin)
+
+        threshold = int(len(bins_razr_new) * 0.8) - 1
+        count = len(bins_razr_new) - threshold
+        elem = bins_razr_new[len(bins_razr_new) - 1]
+        while(count != 0):
+            bins_razr_new.pop(threshold)
+            count = count - 1
+        bins_razr_new.append(elem)
+
+        bins = plt.hist(self.array_of_y, bins=bins_razr_new, density=True)
+
+        iter = 0
+        for ranges in bins[1]:
+            self.array_of_z.insert(iter, round(ranges, 2))
+            iter += 1
+
+        self.compute_l_array()
+        self.compute_f_array()
+
+        z_average = self.compute_z_average()
+        f_ksi_z = self.compute_f_ksi_z(z_average)
+        plt.plot(z_average, f_ksi_z, color="red")
 
         self.compute_mery(f_ksi_z)
 
@@ -261,6 +316,11 @@ class Lab():
         self.clean_arrays_for_second_part()
 
         self.create_histogram_second_case()
+
+    def second_part_third_case(self):
+        self.clean_arrays_for_second_part()
+
+        self.create_histogram_third_case()
 
     def second_part_fourth_case(self):
         self.clean_arrays_for_second_part()
@@ -363,91 +423,146 @@ class Lab():
         else:
             print("R0 = " + str(round(R_0, 2)) + ". Критическое значение = " + str(round(critical_value, 2)) + ". Гипотеза отвергается")
 
-def snd_part(lab):
-    # SECOND PART
-    print()
-    print("ВТОРАЯ ЧАСТЬ")
-    lab.sort_y()
-    print("Доступные варианты выбора разрядов:")
-    print("1 - Выбор разрядов одинаковой длины")
-    print("2 - Выбор разрядов равномерно")
-    print("3 - Выбор разрядов в зависимости от точек")
-    print("4 - Выбор разрядов вручную")
+    def snd_part_ui(self):
+        # SECOND PART
+        print()
+        print("ВТОРАЯ ЧАСТЬ")
+        self.sort_y()
+        print("Доступные варианты выбора разрядов:")
+        print("1 - Выбор разрядов одинаковой длины")
+        print("2 - Выбор разрядов равномерно")
+        print("3 - Выбор разрядов в зависимости от точек")
+        print("4 - Выбор разрядов вручную")
 
-    exit_flag = True
-    while (exit_flag):
-        input_choice = input("Введите номер выбора разрядов: ")
+        exit_flag = True
+        while (exit_flag):
+            input_choice = input("Введите номер выбора разрядов: ")
+            if "1" in input_choice:
+                self.second_part_first_case()
+            if "2" in input_choice:
+                self.second_part_second_case()
+            if "3" in input_choice:
+                self.second_part_third_case()
+            if "4" in input_choice:
+                self.second_part_fourth_case()
+
+            input_continue = input("Выбрать новый выбор разряда? 1 - Да. 0 - Нет: ")
+            if "1" in input_continue:
+                exit_flag = True
+            if "0" in input_continue:
+                exit_flag = False
+
+    def fth_part_ui(self):
+        # FOURTH PART
+        print()
+        print("ЧЕТВЕРТАЯ ЧАСТЬ")
+        self.set_t_zero()
+        self.count_points(self.compute_intervals())
+        print_tab = input("Вывести таблицу количество заявок\число интервалов? 1 - Да. 0 - Нет: ")
+        if "1" in print_tab:
+            self.fourth_part_print_table()
+        self.fourth_part_chi_square()
+
+    def Analytics(self, lambda_var, n, y):
+        print()
+        print("ПЕРВАЯ ЧАСТЬ")
+        print("Доступные проверки. 1 - через мат. ожидание. 2 - через дисперсию, 3 - через функцию распределения")
+        lab = Lab(lambda_var, n, y)
+        exit_flag = True
+
+        # FIRST PART
+        while (exit_flag):
+            input_checks = input("Введите через запятую необходимые проверки: ")
+            if "1" in input_checks:
+                lab.check_through_math_except()
+            if "2" in input_checks:
+                lab.check_through_dispersion()
+            if "3" in input_checks:
+                lab.check_through_func_dist()
+
+            input_continue = input("Ввести новые параметры? 1 - Да. 0 - Нет: ")
+            if "1" in input_continue:
+                exit_flag = True
+            if "0" in input_continue:
+                exit_flag = False
+
+        print()
+        go_to_part = input("Перейти сразу 4 четвертой части?: 1 - Да. 0 - Нет: ")
+
+        if "1" in go_to_part:
+            lab.fth_part_ui()
+            lab.snd_part_ui()
+
+            # THIRD PART
+            print()
+            print("ТРЕТЬЯ ЧАСТЬ")
+            lab.third_part()
+        else:
+            lab.snd_part_ui()
+
+            # THIRD PART
+            print()
+            print("ТРЕТЬЯ ЧАСТЬ")
+            lab.third_part()
+
+            lab.fth_part_ui()
+
+    def part1(self):
+        self.ostream_serviced_reqs = []
+        self.ostream_lost_reqs     = []
+
+        current_time = self.array_of_tau[0] + self.array_of_y[0]
+        self.ostream_serviced_reqs.append(self.array_of_tau[0])
+
+        for i in range(self.param_n - 1):
+            if current_time >= self.array_of_tau[i+1]:
+                self.ostream_lost_reqs.append(self.array_of_tau[i+1])
+            elif current_time < self.array_of_tau[i+1]:
+                current_time = self.array_of_tau[i+1] + self.array_of_y[i+1]
+                self.ostream_serviced_reqs.append(self.array_of_tau[i+1])
+
+        print("П1: " + str(self.ostream_serviced_reqs))
+        print("П2: " + str(self.ostream_lost_reqs))
+
+    def __part23(self, ostream_reqs):
+        self.array_of_y = []
+
+        self.array_of_y.append(ostream_reqs[0])
+        for i in range(1, len(ostream_reqs)- 1):
+            self.array_of_y.append(ostream_reqs[i] - ostream_reqs[i - 1])
+
+        input_choice = input("Способ задания лямбды: 1 - а, 2 - б: ")
+
+        m_length = len(self.array_of_y)
+
         if "1" in input_choice:
-            lab.second_part_first_case()
+            mean = 0
+
+            for i in range(m_length):
+                mean = mean + self.array_of_y[i]
+            mean = mean * (1 / m_length)
+
+            self.param_lambda = 1 / mean
+
         if "2" in input_choice:
-            lab.second_part_second_case()
-        if "3" in input_choice:
-            lab.check_through_func_dist()
-        if "4" in input_choice:
-            lab.second_part_fourth_case()
+            self.param_lambda = m_length / self.param_n * self.param_lambda
 
-        input_continue = input("Выбрать новый выбор разряда? 1 - Да. 0 - Нет: ")
-        if "1" in input_continue:
-            exit_flag = True
-        if "0" in input_continue:
-            exit_flag = False
+        self.param_n = m_length
 
-def fth_part(lab):
-    #FOURTH PART
-    print()
-    print("ЧЕТВЕРТАЯ ЧАСТЬ")
-    lab.set_t_zero()
-    lab.count_points(lab.compute_intervals())
-    print_tab = input("Вывести таблицу количество заявок\число интервалов? 1 - Да. 0 - Нет: ")
-    if "1" in print_tab:
-        lab.fourth_part_print_table()
-    lab.fourth_part_chi_square()
+        self.Analytics(self.param_lambda, self.param_n, self.array_of_y)
+
+    def part2(self):
+        self.__part23(self.ostream_serviced_reqs)
+
+    def part3(self):
+        self.__part23(self.ostream_lost_reqs)
 
 def Main():
     print()
-    print("ПЕРВАЯ ЧАСТЬ")
-    print("Доступные проверки. 1 - через мат. ожидание. 2 - через дисперсию, 3 - через функцию распределения")
-    lab = Lab()
-    exit_flag = True
+    lab_work = Lab()
 
-    #FIRST PART
-    while(exit_flag):
-        input_checks = input("Введите через запятую необходимые проверки: ")
-        if "1" in input_checks:
-            lab.check_through_math_except()
-        if "2" in input_checks:
-            lab.check_through_dispersion()
-        if "3" in input_checks:
-            lab.check_through_func_dist()
-
-        input_continue = input("Ввести новые параметры? 1 - Да. 0 - Нет: ")
-        if "1" in input_continue:
-            exit_flag = True
-        if "0" in input_continue:
-            exit_flag = False
-
-
-    print()
-    go_to_part = input("Перейти сразу 4 четвертой части?: 1 - Да. 0 - Нет: ")
-
-    if "1" in go_to_part:
-        fth_part(lab)
-
-        snd_part(lab)
-
-        #THIRD PART
-        print()
-        print("ТРЕТЬЯ ЧАСТЬ")
-        lab.third_part()
-    else:
-        snd_part(lab)
-
-        #THIRD PART
-        print()
-        print("ТРЕТЬЯ ЧАСТЬ")
-        lab.third_part()
-
-        fth_part(lab)
+    lab_work.part1()
+    lab_work.part2()
 
 if __name__ == "__main__":
     Main()
