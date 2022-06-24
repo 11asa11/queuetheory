@@ -10,13 +10,15 @@ def toFixed(numObj, digits=0):
     return f"{numObj:.{digits}f}"
 
 class Lab():
-    def __init__(self, lambda_var = None, n = None, y = None):
+    def __init__(self, exponential = True, lambda_var = None, a = None, b = None, n = None, y = None):
+        self.__init_empty_members()
+        self.exponential = exponential
+        self.__init_vars(lambda_var = lambda_var, a = a, b = b, n = n, y = y)
 
+    def __init_empty_members(self):
         # For 1st part
         self.array_of_y   = []
         self.array_of_tau = []
-
-        self.__init_vars(lambda_var = lambda_var, n = n, y = y)
 
         # For 2nd part
         self.array_of_z = []
@@ -34,12 +36,31 @@ class Lab():
         tau_iter = 0
         for i in range(self.param_n):
             x_iter = random.random()
-            y_iter = -(log(1 - x_iter)) / self.param_lambda
+            y_iter = None
+            if self.exponential:
+                y_iter = -(log(1 - x_iter)) / self.param_lambda
+            else:
+                y_iter = self.param_a + (self.param_b-self.param_a) * x_iter
             tau_iter += y_iter
             self.array_of_y.insert(iter, y_iter)
             self.array_of_tau.insert(iter, tau_iter)
             iter += 1
         print()
+
+    def __fill_arrays_again(self):
+        self.array_of_y = []
+        iter = 0
+        tau_iter = 0
+        for i in range(self.param_n):
+            x_iter = random.random()
+            y_iter = None
+            if self.exponential:
+                y_iter = -(log(1 - x_iter)) / self.param_lambda
+            else:
+                y_iter = self.param_a + (self.param_b - self.param_a) * x_iter
+            tau_iter += y_iter
+            self.array_of_y.insert(iter, y_iter)
+            iter += 1
 
     def __print_arrays(self):
         input_print_arrays = input("Вывести массивы x, y и tau? 1 - Да. 0 - Нет: ")
@@ -60,13 +81,33 @@ class Lab():
                 print(toFixed(tau, count_of_symb), end =" ")
             print()
 
-    def __init_vars_manually(self):
+    def __init_vars_exponential(self):
         self.param_lambda = float(input("Введите параметр лямбда: "))
         self.param_n      = int(input("Введите параметр n: "))
 
         self.__fill_arrays_randomly()
 
-    def __init_vars_by_input_data(self, lambda_var, n, y):
+    def __init_vars_uniform(self):
+        self.param_a = float(input("Введите параметр a: "))
+        self.param_b = float(input("Введите параметр b: "))
+        self.param_n = int(input("Введите параметр n: "))
+
+        self.__fill_arrays_randomly()
+
+    def __init_vars_manually(self):
+        if self.exponential:
+            self.__init_vars_exponential()
+        else:
+            self.__init_vars_uniform()
+
+        """
+        self.param_lambda = float(input("Введите параметр лямбда: "))
+        self.param_mu     = float(input("Введите параметр mu: "))
+        self.param_n      = int(input("Введите параметр n: "))
+        """
+        self.__fill_arrays_randomly()
+
+    def __init_vars_by_input_exponential_data(self, lambda_var, n, y):
         self.param_lambda = lambda_var
         self.param_n = n
         self.array_of_y = y
@@ -79,9 +120,17 @@ class Lab():
         print("Параметр лямбда: " + str(self.param_lambda))
         print("Параметр n: " + str(self.param_n))
 
-    def __init_vars(self, lambda_var = None, n = None, y = None):
+    def __init_vars_by_input_uniform_data(self, a, b, n, y):
+        self.param_a = a
+        self.param_b = b
+        self.param_n = n
+        self.array_of_y = y
+
+    def __init_vars(self, lambda_var = None, a = None, b = None, n = None, y = None):
         if lambda_var and n and y:
-            self.__init_vars_by_input_data(lambda_var, n, y)
+            self.__init_vars_by_input_exponential_data(lambda_var, n, y)
+        elif a and b and n and y:
+            self.__init_vars_by_input_uniform_data(a, b, n, y)
         elif not lambda_var and not n and not y:
             self.__init_vars_manually()
 
@@ -102,6 +151,7 @@ class Lab():
     def check_through_dispersion(self):
         print("Проверка через дисперсию: ")
         disp = 1 / (self.param_lambda * self.param_lambda)
+        self.math_except_new = (1 / self.param_n) * sum(self.array_of_y)
         disp_sum = 0
         for y in self.array_of_y:
             disp_sum += (y - self.math_except_new) * (y - self.math_except_new)
@@ -309,7 +359,7 @@ class Lab():
     def second_part_first_case(self):
         self.clean_arrays_for_second_part()
 
-        self.first_case_of_bins()
+        #self.first_case_of_bins()
         self.create_histogram_first_case()
 
     def second_part_second_case(self):
@@ -536,13 +586,7 @@ class Lab():
         m_length = len(self.array_of_y)
 
         if "1" in input_choice:
-            mean = 0
-
-            for i in range(m_length):
-                mean = mean + self.array_of_y[i]
-            mean = mean * (1 / m_length)
-
-            self.param_lambda = 1 / mean
+            self.param_lambda = 1 / (sum(self.array_of_y) * (1 / m_length))
 
         if "2" in input_choice:
             self.param_lambda = m_length / self.param_n * self.param_lambda
@@ -556,6 +600,9 @@ class Lab():
 
     def part3(self):
         self.__part23(self.ostream_lost_reqs)
+
+    def exponential_uniform(self):
+        exp_uni = Lab()
 
 def Main():
     print()
