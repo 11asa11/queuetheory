@@ -11,7 +11,6 @@ def toFixed(numObj, digits=0):
 
 class Generation():
     def __init__(self, exponential = True, lambda_var = None, a = None, b = None, n = None, y = None):
-        print("__init__")
         self.array_of_y = []
         self.array_of_tau = []
         self.exponential = exponential
@@ -19,7 +18,6 @@ class Generation():
         self.param_a = a
         self.param_b = b
         self.param_n = n
-        print("__init__")
         self.__init_vars(lambda_var = lambda_var, a = a, b = b, n = n, y = y)
 
     def __fill_array_y(self):
@@ -56,10 +54,8 @@ class Generation():
             self.array_of_y.insert(iter, y_iter)
             self.array_of_tau.insert(iter, tau_iter)
             iter += 1
-        print()
 
     def __init_vars_exponential(self):
-        print("__init_vars_exponential")
         self.param_lambda = float(input("Введите параметр лямбда: "))
         self.param_n = int(input("Введите параметр n: "))
 
@@ -73,14 +69,10 @@ class Generation():
         self.__fill_arrays_randomly()
 
     def __init_vars_manually(self):
-        print("__init_vars_manually")
-        print(self.exponential)
         if self.exponential:
             self.__init_vars_exponential()
         else:
             self.__init_vars_uniform()
-
-        self.__fill_arrays_randomly()
 
     def __init_vars_by_input_exponential_data(self, lambda_var, n, y):
         self.param_lambda = lambda_var
@@ -102,18 +94,17 @@ class Generation():
         self.array_of_y = y
 
     def __init_exponential_y_for_comparison(self, lambda_var, n):
-        self.param_lambda = lambda_var
+        self.param_lambda = float(input("Введите параметр лямбда: "))
         self.param_n = n
         self.__fill_array_y()
 
     def __init_uniform_y_for_comparison(self, a, b, n):
-        self.param_a = a
-        self.param_b = b
+        self.param_a = float(input("Введите параметр a: "))
+        self.param_b = float(input("Введите параметр b: "))
         self.param_n = n
         self.__fill_array_y()
 
     def __init_vars(self, lambda_var=None, a=None, b=None, n=None, y=None):
-        print("__init_vars")
         if lambda_var and n:
             self.__init_exponential_y_for_comparison(lambda_var, n)
         elif a and b and n:
@@ -581,11 +572,14 @@ class Lab():
             if "3" in input_checks:
                 analyzer.check_through_func_dist()
 
+            exit_flag = False
+            """
             input_continue = input("Ввести новые параметры? 1 - Да. 0 - Нет: ")
             if "1" in input_continue:
                 exit_flag = True
             if "0" in input_continue:
                 exit_flag = False
+            """
 
         print()
         go_to_part = input("Перейти сразу 4 четвертой части?: 1 - Да. 0 - Нет: ")
@@ -609,7 +603,6 @@ class Lab():
             analyzer.fth_part_ui()
 
     def part1(self, array_of_y, array_of_tau, param_n, ostream_serviced_reqs, ostream_lost_reqs):
-
         current_time = array_of_tau[0] + array_of_y[0]
         ostream_serviced_reqs.append(array_of_tau[0])
 
@@ -623,12 +616,17 @@ class Lab():
         print("П1: " + str(ostream_serviced_reqs))
         print("П2: " + str(ostream_lost_reqs))
 
-    def __part23(self, ostream_reqs, param_lambda, param_n):
+    def array_for_ostream_reqs(self, ostream_reqs):
         array_of_y = []
 
         array_of_y.append(ostream_reqs[0])
         for i in range(1, len(ostream_reqs)- 1):
             array_of_y.append(ostream_reqs[i] - ostream_reqs[i - 1])
+
+        return array_of_y
+
+    def __part23(self, ostream_reqs, param_lambda, param_n):
+        array_of_y = self.array_for_ostream_reqs(ostream_reqs)
 
         input_choice = input("Способ задания лямбды: 1 - а, 2 - б: ")
 
@@ -654,9 +652,34 @@ class Lab():
         ostream_serviced_reqs = []
         ostream_lost_reqs = []
         self.part1(y, tau, param_n, ostream_serviced_reqs, ostream_lost_reqs)
-        self.__part23(ostream_serviced_reqs, param_lambda, param_n)
-        #self.__part23(ostream_lost_reqs, param_lambda, param_n)
 
+        array_ostream_serviced_reqs = self.array_for_ostream_reqs(ostream_serviced_reqs)
+        array_ostream_lost_reqs = self.array_for_ostream_reqs(ostream_lost_reqs)
+
+        param_m = int(1.44 * log(len(array_ostream_serviced_reqs)) + 1)
+        plt.figure(1)
+        plt.plot()
+        plt.hist(array_ostream_serviced_reqs, bins = param_m, density=True, range = (0,max(array_ostream_serviced_reqs)))
+
+        param_m = int(1.44 * log(len(array_ostream_lost_reqs)) + 1)
+        plt.figure(2)
+        plt.plot()
+        plt.hist(array_ostream_lost_reqs, bins = param_m, density=True, range = (0,max(array_ostream_lost_reqs)))
+
+        plt.show()
+
+    def exponential_uniform_analytics(self):
+        exponential_ksi = Generation()
+        param_lambda = exponential_ksi.param_lambda
+        param_n = exponential_ksi.param_n
+        exponential_nu = Generation(lambda_var = param_lambda, n = param_n)
+        y = exponential_nu.array_of_y
+        tau = exponential_ksi.array_of_tau
+        ostream_serviced_reqs = []
+        ostream_lost_reqs = []
+        self.part1(y, tau, param_n, ostream_serviced_reqs, ostream_lost_reqs)
+        self.__part23(ostream_serviced_reqs, param_lambda, param_n)
+        self.__part23(ostream_lost_reqs, param_lambda, param_n)
 
 def Main():
     print()
