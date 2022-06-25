@@ -616,9 +616,10 @@ class Lab():
     def array_for_ostream_reqs(self, ostream_reqs):
         array_of_y = []
 
-        array_of_y.append(ostream_reqs[0])
-        for i in range(1, len(ostream_reqs)- 1):
-            array_of_y.append(ostream_reqs[i] - ostream_reqs[i - 1])
+        if ostream_reqs != []:
+            array_of_y.append(ostream_reqs[0])
+            for i in range(1, len(ostream_reqs)- 1):
+                array_of_y.append(ostream_reqs[i] - ostream_reqs[i - 1])
 
         return array_of_y
 
@@ -640,10 +641,10 @@ class Lab():
         self.Analytics(array_of_y, param_n, lambda_var = param_lambda)
 
     def exponential_exponential_analytics(self):
-        exponential_ksi = Generation()
+        exponential_ksi = Generation(exponential=True)
         param_lambda = exponential_ksi.param_lambda
         param_n = exponential_ksi.param_n
-        exponential_nu = Generation(lambda_var = param_lambda, n = param_n)
+        exponential_nu = Generation(exponential=True, n = param_n)
         y = exponential_nu.array_of_y
         tau = exponential_ksi.array_of_tau
         ostream_serviced_reqs = []
@@ -661,11 +662,35 @@ class Lab():
         b = uniform_ksi.param_b
         self.Analytics(y,n,tau=tau,a=a,b=b)
 
-    def exponential_exponential(self):
-        exponential_ksi = Generation()
-        param_lambda = exponential_ksi.param_lambda
+    def distribution1_distribution2(self, distribution1, distribution2):
+        exponential_ksi = Generation(exponential=True)
         param_n = exponential_ksi.param_n
-        exponential_nu = Generation(lambda_var = param_lambda, n = param_n)
+        exponential_nu = Generation(exponential=True, n=param_n)
+        y = exponential_nu.array_of_y
+        tau = exponential_ksi.array_of_tau
+        ostream_serviced_reqs = []
+        ostream_lost_reqs = []
+        self.part1(y, tau, param_n, ostream_serviced_reqs, ostream_lost_reqs)
+
+        array_ostream_serviced_reqs = self.array_for_ostream_reqs(ostream_serviced_reqs)
+        array_ostream_lost_reqs = self.array_for_ostream_reqs(ostream_lost_reqs)
+
+        param_m = int(1.44 * log(len(array_ostream_serviced_reqs)) + 1)
+        plt.figure(1)
+        plt.plot()
+        plt.hist(array_ostream_serviced_reqs, bins=param_m, density=True, range=(0, max(array_ostream_serviced_reqs)))
+
+        param_m = int(1.44 * log(len(array_ostream_lost_reqs)) + 1)
+        plt.figure(2)
+        plt.plot()
+        plt.hist(array_ostream_lost_reqs, bins=param_m, density=True, range=(0, max(array_ostream_lost_reqs)))
+
+        plt.show()
+
+    def exponential_exponential(self):
+        exponential_ksi = Generation(exponential=True)
+        param_n = exponential_ksi.param_n
+        exponential_nu = Generation(exponential=True, n = param_n)
         y = exponential_nu.array_of_y
         tau = exponential_ksi.array_of_tau
         ostream_serviced_reqs = []
@@ -688,10 +713,9 @@ class Lab():
         plt.show()
 
     def exponential_uniform(self):
-        exponential_ksi = Generation()
-        param_lambda = exponential_ksi.param_lambda
+        exponential_ksi = Generation(exponential=True)
         param_n = exponential_ksi.param_n
-        uniform_nu = Generation(exponential=False)
+        uniform_nu = Generation(exponential=False, n = param_n)
         y = uniform_nu.array_of_y
         tau = exponential_ksi.array_of_tau
         ostream_serviced_reqs = []
@@ -713,13 +737,12 @@ class Lab():
 
         plt.show()
 
-    def exponential_uniform(self):
-        exponential_ksi = Generation()
-        param_lambda = exponential_ksi.param_lambda
-        param_n = exponential_ksi.param_n
-        uniform_nu = Generation(exponential=False,)
-        y = uniform_nu.array_of_y
-        tau = exponential_ksi.array_of_tau
+    def uniform_exponential(self):
+        uniform_ksi = Generation(exponential=False)
+        param_n = uniform_ksi.param_n
+        exponential_nu = Generation(exponential=True, n = param_n)
+        y = exponential_nu.array_of_y
+        tau = uniform_ksi.array_of_tau
         ostream_serviced_reqs = []
         ostream_lost_reqs = []
         self.part1(y, tau, param_n, ostream_serviced_reqs, ostream_lost_reqs)
@@ -727,22 +750,51 @@ class Lab():
         array_ostream_serviced_reqs = self.array_for_ostream_reqs(ostream_serviced_reqs)
         array_ostream_lost_reqs = self.array_for_ostream_reqs(ostream_lost_reqs)
 
-        param_m = int(1.44 * log(len(array_ostream_serviced_reqs)) + 1)
-        plt.figure(1)
-        plt.plot()
-        plt.hist(array_ostream_serviced_reqs, bins = param_m, density=True, range = (0,max(array_ostream_serviced_reqs)))
+        if array_ostream_serviced_reqs != []:
+            param_m = int(1.44 * log(len(array_ostream_serviced_reqs)) + 1)
+            plt.figure(1)
+            plt.plot()
+            plt.hist(array_ostream_serviced_reqs, bins = param_m, density=True, range = (0,max(array_ostream_serviced_reqs)))
 
-        param_m = int(1.44 * log(len(array_ostream_lost_reqs)) + 1)
-        plt.figure(2)
-        plt.plot()
-        plt.hist(array_ostream_lost_reqs, bins = param_m, density=True, range = (0,max(array_ostream_lost_reqs)))
+        if array_ostream_serviced_reqs != []:
+            param_m = int(1.44 * log(len(array_ostream_lost_reqs)) + 1)
+            plt.figure(2)
+            plt.plot()
+            plt.hist(array_ostream_lost_reqs, bins = param_m, density=True, range = (0,max(array_ostream_lost_reqs)))
+
+        plt.show()
+
+    def uniform_uniform(self):
+        uniform_ksi = Generation(exponential=False)
+        param_n = uniform_ksi.param_n
+        exponential_nu = Generation(exponential=False, n = param_n)
+        y = exponential_nu.array_of_y
+        tau = uniform_ksi.array_of_tau
+        ostream_serviced_reqs = []
+        ostream_lost_reqs = []
+        self.part1(y, tau, param_n, ostream_serviced_reqs, ostream_lost_reqs)
+
+        array_ostream_serviced_reqs = self.array_for_ostream_reqs(ostream_serviced_reqs)
+        array_ostream_lost_reqs = self.array_for_ostream_reqs(ostream_lost_reqs)
+
+        if array_ostream_serviced_reqs != []:
+            param_m = int(1.44 * log(len(array_ostream_serviced_reqs)) + 1)
+            plt.figure(1)
+            plt.plot()
+            plt.hist(array_ostream_serviced_reqs, bins = param_m, density=True, range = (0,max(array_ostream_serviced_reqs)))
+
+        if array_ostream_serviced_reqs != []:
+            param_m = int(1.44 * log(len(array_ostream_lost_reqs)) + 1)
+            plt.figure(2)
+            plt.plot()
+            plt.hist(array_ostream_lost_reqs, bins = param_m, density=True, range = (0,max(array_ostream_lost_reqs)))
 
         plt.show()
 
 def Main():
     print()
     lab_work = Lab()
-    lab_work.exponential_uniform()
+    lab_work.uniform_uniform()
 
 if __name__ == "__main__":
     Main()
