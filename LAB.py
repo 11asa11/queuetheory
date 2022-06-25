@@ -329,7 +329,8 @@ class Analyzer:
     def create_histogram_first_case(self):
         param_m = int(1.44 * log(self.param_n) + 1)
 
-        bins = plt.hist(self.array_of_y, bins = param_m, density=True, range = (0,max(self.array_of_y)))
+        bins = plt.hist(self.array_of_y, bins = param_m, density=True, range = (min(self.array_of_y),max(self.array_of_y)))
+        #print(self.array_of_y)
         #sns.histplot(data=self.array_of_y, bins=param_m, stat='density')
         iter = 0
         for ranges in bins[1]:
@@ -340,6 +341,7 @@ class Analyzer:
         self.compute_f_array()
 
         z_average = self.compute_z_average()
+        #print(z_average)
         f_ksi_z = self.compute_f_ksi_z(z_average)
         plt.plot(z_average, f_ksi_z, color = "red")
 
@@ -796,9 +798,9 @@ class Lab():
 def Main():
     print()
     lab_work = Lab()
-    lab_work.exponential_uniform(True)
-    lab_work.uniform_uniform(True)
-    #lab_work.uniform_analytics()
+    #lab_work.exponential_uniform(True)
+    #lab_work.uniform_uniform(True)
+    lab_work.uniform_analytics()
     #lab_work.exponential_uniform(True)
     #lab_work.hist_for_all_serviced_reqs()
 
