@@ -10,15 +10,15 @@ def toFixed(numObj, digits=0):
     return f"{numObj:.{digits}f}"
 
 class Generation():
-    def __init__(self, exponential = True, lambda_var = None, a = None, b = None, n = None, y = None):
+    def __init__(self, exponential = True, n = None):
         self.array_of_y = []
         self.array_of_tau = []
         self.exponential = exponential
-        self.param_lambda = lambda_var
-        self.param_a = a
-        self.param_b = b
+        self.param_lambda = None
+        self.param_a = None
+        self.param_b = None
         self.param_n = n
-        self.__init_vars(lambda_var = lambda_var, a = a, b = b, n = n, y = y)
+        self.__init_vars(n = n)
 
     def __fill_array_y(self):
         iter = 0
@@ -74,42 +74,23 @@ class Generation():
         else:
             self.__init_vars_uniform()
 
-    def __init_vars_by_input_exponential_data(self, lambda_var, n, y):
-        self.param_lambda = lambda_var
-        self.param_n = n
-        self.array_of_y = y
-
-        tau_iter = 0
-        for i in range(self.param_n):
-            tau_iter += self.array_of_y[i]
-            self.array_of_tau.append(tau_iter)
-
-        print("Параметр лямбда: " + str(self.param_lambda))
-        print("Параметр n: " + str(self.param_n))
-
-    def __init_vars_by_input_uniform_data(self, a, b, n, y):
-        self.param_a = a
-        self.param_b = b
-        self.param_n = n
-        self.array_of_y = y
-
-    def __init_exponential_y_for_comparison(self, lambda_var, n):
+    def __init_exponential_y_for_comparison(self, n):
         self.param_lambda = float(input("Введите параметр лямбда: "))
         self.param_n = n
-        self.__fill_array_y()
+        self.__fill_arrays_randomly()
 
-    def __init_uniform_y_for_comparison(self, a, b, n):
+    def __init_uniform_y_for_comparison(self,n):
         self.param_a = float(input("Введите параметр a: "))
         self.param_b = float(input("Введите параметр b: "))
         self.param_n = n
-        self.__fill_array_y()
+        self.__fill_arrays_randomly()
 
-    def __init_vars(self, lambda_var=None, a=None, b=None, n=None, y=None):
-        if lambda_var and n:
-            self.__init_exponential_y_for_comparison(lambda_var, n)
-        elif a and b and n:
-            self.__init_uniform_y_for_comparison(a, b, n)
-        elif not lambda_var and not a and not b and not n and not y:
+    def __init_vars(self, n=None):
+        if n and self.exponential:
+            self.__init_exponential_y_for_comparison(n)
+        elif n and not self.exponential:
+            self.__init_uniform_y_for_comparison(n)
+        elif not n:
             self.__init_vars_manually()
         """
         if lambda_var and n and y:
@@ -658,6 +639,28 @@ class Lab():
 
         self.Analytics(array_of_y, param_n, lambda_var = param_lambda)
 
+    def exponential_exponential_analytics(self):
+        exponential_ksi = Generation()
+        param_lambda = exponential_ksi.param_lambda
+        param_n = exponential_ksi.param_n
+        exponential_nu = Generation(lambda_var = param_lambda, n = param_n)
+        y = exponential_nu.array_of_y
+        tau = exponential_ksi.array_of_tau
+        ostream_serviced_reqs = []
+        ostream_lost_reqs = []
+        self.part1(y, tau, param_n, ostream_serviced_reqs, ostream_lost_reqs)
+        self.__part23(ostream_serviced_reqs, param_lambda, param_n)
+        self.__part23(ostream_lost_reqs, param_lambda, param_n)
+
+    def uniform_analytics(self):
+        uniform_ksi = Generation(exponential=False)
+        y = uniform_ksi.array_of_y
+        n = uniform_ksi.param_n
+        tau = uniform_ksi.array_of_tau
+        a = uniform_ksi.param_a
+        b = uniform_ksi.param_b
+        self.Analytics(y,n,tau=tau,a=a,b=b)
+
     def exponential_exponential(self):
         exponential_ksi = Generation()
         param_lambda = exponential_ksi.param_lambda
@@ -684,32 +687,62 @@ class Lab():
 
         plt.show()
 
-    def exponential_exponential_analytics(self):
+    def exponential_uniform(self):
         exponential_ksi = Generation()
         param_lambda = exponential_ksi.param_lambda
         param_n = exponential_ksi.param_n
-        exponential_nu = Generation(lambda_var = param_lambda, n = param_n)
-        y = exponential_nu.array_of_y
+        uniform_nu = Generation(exponential=False)
+        y = uniform_nu.array_of_y
         tau = exponential_ksi.array_of_tau
         ostream_serviced_reqs = []
         ostream_lost_reqs = []
         self.part1(y, tau, param_n, ostream_serviced_reqs, ostream_lost_reqs)
-        self.__part23(ostream_serviced_reqs, param_lambda, param_n)
-        self.__part23(ostream_lost_reqs, param_lambda, param_n)
 
-    def uniform_analytics(self):
-        uniform_ksi = Generation(exponential=False)
-        y = uniform_ksi.array_of_y
-        n = uniform_ksi.param_n
-        tau = uniform_ksi.array_of_tau
-        a = uniform_ksi.param_a
-        b = uniform_ksi.param_b
-        self.Analytics(y,n,tau=tau,a=a,b=b)
+        array_ostream_serviced_reqs = self.array_for_ostream_reqs(ostream_serviced_reqs)
+        array_ostream_lost_reqs = self.array_for_ostream_reqs(ostream_lost_reqs)
+
+        param_m = int(1.44 * log(len(array_ostream_serviced_reqs)) + 1)
+        plt.figure(1)
+        plt.plot()
+        plt.hist(array_ostream_serviced_reqs, bins = param_m, density=True, range = (0,max(array_ostream_serviced_reqs)))
+
+        param_m = int(1.44 * log(len(array_ostream_lost_reqs)) + 1)
+        plt.figure(2)
+        plt.plot()
+        plt.hist(array_ostream_lost_reqs, bins = param_m, density=True, range = (0,max(array_ostream_lost_reqs)))
+
+        plt.show()
+
+    def exponential_uniform(self):
+        exponential_ksi = Generation()
+        param_lambda = exponential_ksi.param_lambda
+        param_n = exponential_ksi.param_n
+        uniform_nu = Generation(exponential=False,)
+        y = uniform_nu.array_of_y
+        tau = exponential_ksi.array_of_tau
+        ostream_serviced_reqs = []
+        ostream_lost_reqs = []
+        self.part1(y, tau, param_n, ostream_serviced_reqs, ostream_lost_reqs)
+
+        array_ostream_serviced_reqs = self.array_for_ostream_reqs(ostream_serviced_reqs)
+        array_ostream_lost_reqs = self.array_for_ostream_reqs(ostream_lost_reqs)
+
+        param_m = int(1.44 * log(len(array_ostream_serviced_reqs)) + 1)
+        plt.figure(1)
+        plt.plot()
+        plt.hist(array_ostream_serviced_reqs, bins = param_m, density=True, range = (0,max(array_ostream_serviced_reqs)))
+
+        param_m = int(1.44 * log(len(array_ostream_lost_reqs)) + 1)
+        plt.figure(2)
+        plt.plot()
+        plt.hist(array_ostream_lost_reqs, bins = param_m, density=True, range = (0,max(array_ostream_lost_reqs)))
+
+        plt.show()
 
 def Main():
     print()
     lab_work = Lab()
-    lab_work.uniform_analytics()
+    lab_work.exponential_uniform()
 
 if __name__ == "__main__":
     Main()
