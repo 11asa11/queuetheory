@@ -163,7 +163,7 @@ class Analyzer:
     def __init__(self, y, n, tau = None, param_lambda = None, a = None, b = None):
         self.__init_empty_members()
         self.array_of_y = y
-        self.array_of_tau = None
+        self.array_of_tau = tau
         self.param_n = n
         self.param_lambda = param_lambda
         self.a = a
@@ -183,7 +183,11 @@ class Analyzer:
 
     def check_through_math_except(self):
         print("Проверка через мат. ожидание: ")
-        self.math_except = 1 / self.param_lambda
+        self.math_except = None
+        if self.param_lambda:
+            self.math_except = 1 / self.param_lambda
+        elif self.a and self.b:
+            self.math_except = (self.a+self.b)/2
         self.math_except_new = (1 / self.param_n) * sum(self.array_of_y)
         result_math = abs(self.math_except - self.math_except_new) * 100
         print("Ответ: " + str(round(result_math, 5)) + " %")
@@ -191,7 +195,11 @@ class Analyzer:
 
     def check_through_dispersion(self):
         print("Проверка через дисперсию: ")
-        disp = 1 / (self.param_lambda * self.param_lambda)
+        disp = None
+        if self.param_lambda:
+            disp = 1 / (self.param_lambda * self.param_lambda)
+        elif self.a and self.b:
+            disp = ((self.b-self.a)**2)/12
         self.math_except_new = (1 / self.param_n) * sum(self.array_of_y)
         disp_sum = 0
         for y in self.array_of_y:
@@ -204,7 +212,11 @@ class Analyzer:
     def check_through_func_dist(self):
         print("Проверка через функцию распределения: ")
         x_zero = float(input("Введите параметр x0 > 0: "))
-        f_x_zero = 1 - exp(-self.param_lambda * x_zero)
+        f_x_zero = None
+        if self.param_lambda:
+            f_x_zero = 1 - exp(-self.param_lambda * x_zero)
+        elif self.a and self.b:
+            f_x_zero = (x_zero - self.a)/(self.b - self.a)
 
         m_x_zero = 0 # Count of intervals which has length smaller than x0
         for length_of_interval in self.array_of_y:
@@ -272,7 +284,11 @@ class Analyzer:
         f_ksi = []
         iter = 0
         for z_i in z_average:
-            f_ksi_i = round(self.param_lambda * exp(-self.param_lambda * z_i), 2)
+            f_ksi_i = None
+            if self.param_lambda:
+                f_ksi_i = round(self.param_lambda * exp(-self.param_lambda * z_i), 2)
+            elif self.a and self.b:
+                f_ksi_i = round(1 / (self.b-self.a), 2)
             f_ksi.insert(iter, f_ksi_i)
             iter += 1
 
@@ -424,13 +440,22 @@ class Analyzer:
 
     def third_part(self):
         r = len(self.array_of_l) - 1
-        print("Рассматривается гипотеза H0 случайной велечины, распределенной по показательному распределению с")
-        print("lamda = " + str(self.param_lambda) + " и r = " + str(r) + " степенями свободы")
+        if self.param_lambda:
+            print("Рассматривается гипотеза H0 случайной велечины, распределенной по показательному распределению с")
+            print("lamda = " + str(self.param_lambda) + " и r = " + str(r) + " степенями свободы")
+        elif self.a and self.b:
+            print("Рассматривается гипотеза H0 случайной велечины, распределенной по равномерному распределению с")
+            print("a = " + str(self.a) + ", b = " + str(self.b) + " и r = " + str(r) + " степенями свободы")
         R_0 = 0
 
         for i in range(len(self.array_of_l)):
-            p_i = (1 - exp(-self.param_lambda * self.array_of_z[i + 1])) - (
-                    1 - exp(-self.param_lambda * self.array_of_z[i]))
+            p_i = None
+            if self.param_lambda:
+                p_i = (1 - exp(-self.param_lambda * self.array_of_z[i + 1])) - (
+                        1 - exp(-self.param_lambda * self.array_of_z[i]))
+            elif self.a and self.b:
+                p_i = ((self.array_of_z[i + 1] - self.a)/(self.b - self.a)) - (
+                        (self.array_of_z[i] - self.a)/(self.b - self.a))
             R_0 += ((self.array_of_l[i] - self.param_n * p_i) ** 2) / (self.param_n * p_i)
 
         alpha = 1 - round(float(input("Квантиль распределения: ")), 2)
@@ -545,14 +570,15 @@ class Analyzer:
 
     def fth_part_ui(self):
         # FOURTH PART
-        print()
-        print("ЧЕТВЕРТАЯ ЧАСТЬ")
-        self.set_t_zero()
-        self.count_points(self.compute_intervals())
-        print_tab = input("Вывести таблицу количество заявок\число интервалов? 1 - Да. 0 - Нет: ")
-        if "1" in print_tab:
-            self.fourth_part_print_table()
-        self.fourth_part_chi_square()
+        if self.param_lambda:
+            print()
+            print("ЧЕТВЕРТАЯ ЧАСТЬ")
+            self.set_t_zero()
+            self.count_points(self.compute_intervals())
+            print_tab = input("Вывести таблицу количество заявок\число интервалов? 1 - Да. 0 - Нет: ")
+            if "1" in print_tab:
+                self.fourth_part_print_table()
+            self.fourth_part_chi_square()
 
 class Lab():
     def Analytics(self, y, n, tau = None, lambda_var = None, a = None, b = None):
@@ -582,25 +608,15 @@ class Lab():
             """
 
         print()
-        go_to_part = input("Перейти сразу 4 четвертой части?: 1 - Да. 0 - Нет: ")
 
-        if "1" in go_to_part:
-            analyzer.fth_part_ui()
-            analyzer.snd_part_ui()
+        analyzer.snd_part_ui()
 
-            # THIRD PART
-            print()
-            print("ТРЕТЬЯ ЧАСТЬ")
-            analyzer.third_part()
-        else:
-            analyzer.snd_part_ui()
+        # THIRD PART
+        print()
+        print("ТРЕТЬЯ ЧАСТЬ")
+        analyzer.third_part()
 
-            # THIRD PART
-            print()
-            print("ТРЕТЬЯ ЧАСТЬ")
-            analyzer.third_part()
-
-            analyzer.fth_part_ui()
+        analyzer.fth_part_ui()
 
     def part1(self, array_of_y, array_of_tau, param_n, ostream_serviced_reqs, ostream_lost_reqs):
         current_time = array_of_tau[0] + array_of_y[0]
@@ -613,8 +629,8 @@ class Lab():
                 current_time = array_of_tau[i+1] + array_of_y[i+1]
                 ostream_serviced_reqs.append(array_of_tau[i+1])
 
-        print("П1: " + str(ostream_serviced_reqs))
-        print("П2: " + str(ostream_lost_reqs))
+        #print("П1: " + str(ostream_serviced_reqs))
+        #print("П2: " + str(ostream_lost_reqs))
 
     def array_for_ostream_reqs(self, ostream_reqs):
         array_of_y = []
@@ -642,7 +658,7 @@ class Lab():
 
         self.Analytics(array_of_y, param_n, lambda_var = param_lambda)
 
-    def exponential_uniform(self):
+    def exponential_exponential(self):
         exponential_ksi = Generation()
         param_lambda = exponential_ksi.param_lambda
         param_n = exponential_ksi.param_n
@@ -668,7 +684,7 @@ class Lab():
 
         plt.show()
 
-    def exponential_uniform_analytics(self):
+    def exponential_exponential_analytics(self):
         exponential_ksi = Generation()
         param_lambda = exponential_ksi.param_lambda
         param_n = exponential_ksi.param_n
@@ -681,10 +697,19 @@ class Lab():
         self.__part23(ostream_serviced_reqs, param_lambda, param_n)
         self.__part23(ostream_lost_reqs, param_lambda, param_n)
 
+    def uniform_analytics(self):
+        uniform_ksi = Generation(exponential=False)
+        y = uniform_ksi.array_of_y
+        n = uniform_ksi.param_n
+        tau = uniform_ksi.array_of_tau
+        a = uniform_ksi.param_a
+        b = uniform_ksi.param_b
+        self.Analytics(y,n,tau=tau,a=a,b=b)
+
 def Main():
     print()
     lab_work = Lab()
-    lab_work.exponential_uniform()
+    lab_work.uniform_analytics()
 
 if __name__ == "__main__":
     Main()
