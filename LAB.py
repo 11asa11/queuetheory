@@ -734,13 +734,13 @@ class Lab():
                 param_m = int(1.44 * log(len(array_ostream_serviced_reqs)) + 1)
                 plt.figure(1)
                 plt.plot()
-                plt.hist(array_ostream_serviced_reqs, bins=param_m, density=True, range=(0, max(array_ostream_serviced_reqs)))
+                plt.hist(array_ostream_serviced_reqs, bins=param_m, density=True, range=(min(array_ostream_serviced_reqs), max(array_ostream_serviced_reqs)))
 
             if array_ostream_lost_reqs != []:
                 param_m = int(1.44 * log(len(array_ostream_lost_reqs)) + 1)
                 plt.figure(2)
                 plt.plot()
-                plt.hist(array_ostream_lost_reqs, bins=param_m, density=True, range=(0, max(array_ostream_lost_reqs)))
+                plt.hist(array_ostream_lost_reqs, bins=param_m, density=True, range=(min(array_ostream_lost_reqs), max(array_ostream_lost_reqs)))
 
             plt.show()
 
@@ -785,7 +785,7 @@ class Lab():
                 param_m = int(1.44 * log(len(req)) + 1)
                 plt.figure(iter+1)
                 plt.plot()
-                plt.hist(req, bins=param_m, density=True, range=(0, max(req)))
+                plt.hist(req, bins=param_m, density=True, range=(min(req), max(req)))
             iter = iter + 1
         plt.show()
 
