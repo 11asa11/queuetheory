@@ -662,7 +662,7 @@ class Lab():
         b = uniform_ksi.param_b
         self.Analytics(y,n,tau=tau,a=a,b=b)
 
-    def distribution1_distribution2(self, distribution1, distribution2):
+    def distribution1_distribution2(self, distribution1, distribution2, plot_here):
         distribution1_ksi = Generation(exponential=distribution1)
         param_n = distribution1_ksi.param_n
         distribution2_nu = Generation(exponential=distribution2, n=param_n)
@@ -675,36 +675,61 @@ class Lab():
         array_ostream_serviced_reqs = self.array_for_ostream_reqs(ostream_serviced_reqs)
         array_ostream_lost_reqs = self.array_for_ostream_reqs(ostream_lost_reqs)
 
-        if array_ostream_serviced_reqs != []:
-            param_m = int(1.44 * log(len(array_ostream_serviced_reqs)) + 1)
-            plt.figure(1)
-            plt.plot()
-            plt.hist(array_ostream_serviced_reqs, bins=param_m, density=True, range=(0, max(array_ostream_serviced_reqs)))
+        if plot_here:
+            if array_ostream_serviced_reqs != []:
+                param_m = int(1.44 * log(len(array_ostream_serviced_reqs)) + 1)
+                plt.figure(1)
+                plt.plot()
+                plt.hist(array_ostream_serviced_reqs, bins=param_m, density=True, range=(0, max(array_ostream_serviced_reqs)))
 
-        if array_ostream_lost_reqs != []:
-            param_m = int(1.44 * log(len(array_ostream_lost_reqs)) + 1)
-            plt.figure(2)
-            plt.plot()
-            plt.hist(array_ostream_lost_reqs, bins=param_m, density=True, range=(0, max(array_ostream_lost_reqs)))
+            if array_ostream_lost_reqs != []:
+                param_m = int(1.44 * log(len(array_ostream_lost_reqs)) + 1)
+                plt.figure(2)
+                plt.plot()
+                plt.hist(array_ostream_lost_reqs, bins=param_m, density=True, range=(0, max(array_ostream_lost_reqs)))
 
+            plt.show()
+
+        return [array_ostream_serviced_reqs, array_ostream_lost_reqs]
+
+    def exponential_exponential(self, plot_here):
+        return self.distribution1_distribution2(True, True, plot_here)
+
+    def exponential_uniform(self, plot_here):
+        return self.distribution1_distribution2(True, False, plot_here)
+
+    def uniform_exponential(self, plot_here):
+        return self.distribution1_distribution2(False, True, plot_here)
+
+    def uniform_uniform(self, plot_here):
+        return self.distribution1_distribution2(False, False, plot_here)
+
+    def hist_for_all_reqs(self, i):
+        reqs = []
+        reqs.append(self.exponential_exponential(False)[i])
+        reqs.append(self.exponential_uniform(False)[i])
+        reqs.append(self.uniform_exponential(False)[i])
+        reqs.append(self.uniform_uniform(False)[i])
+
+        iter = 0
+        for req in reqs:
+            if req:
+                param_m = int(1.44 * log(len(req)) + 1)
+                plt.figure(iter)
+                plt.plot()
+                plt.hist(req, bins=param_m, density=True, range=(0, max(req)))
         plt.show()
 
-    def exponential_exponential(self):
-        self.distribution1_distribution2(True, True)
+    def hist_for_all_serviced_reqs(self):
+        self.hist_for_all_reqs(0)
 
-    def exponential_uniform(self):
-        self.distribution1_distribution2(True, False)
-
-    def uniform_exponential(self):
-        self.distribution1_distribution2(False, True)
-
-    def uniform_uniform(self):
-        self.distribution1_distribution2(False, False)
+    def hist_for_all_lost_reqs(self, i):
+        self.hist_for_all_reqs(1)
 
 def Main():
     print()
     lab_work = Lab()
-    lab_work.uniform_uniform()
+    lab_work.hist_for_all_serviced_reqs()
 
 if __name__ == "__main__":
     Main()
