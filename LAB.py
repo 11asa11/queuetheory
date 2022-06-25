@@ -10,7 +10,7 @@ def toFixed(numObj, digits=0):
     return f"{numObj:.{digits}f}"
 
 class Generation():
-    def __init__(self, exponential = True, n = None):
+    def __init__(self, exponential = True, n = None, param_lambda = None, a = None, b = None):
         self.array_of_y = []
         self.array_of_tau = []
         self.exponential = exponential
@@ -18,7 +18,8 @@ class Generation():
         self.param_a = None
         self.param_b = None
         self.param_n = n
-        self.__init_vars(n = n)
+
+        self.__init_vars(n = n, param_lambda = param_lambda, a = a, b = b)
 
     def __fill_array_y(self):
         iter = 0
@@ -85,13 +86,40 @@ class Generation():
         self.param_n = n
         self.__fill_arrays_randomly()
 
-    def __init_vars(self, n=None):
-        if n and self.exponential:
-            self.__init_exponential_y_for_comparison(n)
-        elif n and not self.exponential:
-            self.__init_uniform_y_for_comparison(n)
-        elif not n:
-            self.__init_vars_manually()
+    def __init_exponential_by_input_data(self, n, param_lambda):
+        self.param_lambda = param_lambda
+        self.param_n = n
+        self.__fill_arrays_randomly()
+
+    def __init_uniform_by_input_data(self, n, a, b):
+        self.param_a = a
+        self.param_b = b
+        self.param_n = n
+        self.__fill_arrays_randomly()
+
+    def __init_by_input_n(self, param_lambda = None, a = None, b = None):
+        self.param_lambda = param_lambda
+        self.param_a = a
+        self.param_b = b
+        self.param_n = int(input("Введите параметр n: "))
+        self.__fill_arrays_randomly()
+
+    def __init_vars(self, n = None, param_lambda = None, a = None, b = None):
+        if not param_lambda and not a and not b:
+            if n and self.exponential:
+                self.__init_exponential_y_for_comparison(n)
+            elif n and not self.exponential:
+                self.__init_uniform_y_for_comparison(n)
+            elif not n:
+                self.__init_vars_manually()
+        else:
+            if n and param_lambda:
+                self.__init_exponential_by_input_data(n, param_lambda)
+            elif n and a and b:
+                self.__init_uniform_by_input_data(n, a, b)
+            elif not n:
+                self.__init_by_input_n(param_lambda = param_lambda, a = a, b = b)
+
         """
         if lambda_var and n and y:
             self.__init_vars_by_input_exponential_data(lambda_var, n, y)
@@ -99,7 +127,7 @@ class Generation():
             self.__init_vars_by_input_uniform_data(a, b, n, y)
         """
 
-        self.__print_arrays()
+        #self.__print_arrays()
         print()
 
     def __fill_arrays_again(self):
@@ -662,10 +690,34 @@ class Lab():
         b = uniform_ksi.param_b
         self.Analytics(y,n,tau=tau,a=a,b=b)
 
-    def distribution1_distribution2(self, distribution1, distribution2, plot_here):
-        distribution1_ksi = Generation(exponential=distribution1)
+    def distribution1_distribution2(self, distribution1, distribution2, plot_here,
+                                    n = None, param_lambda = None, param_mu = None, a1 = None, b1 = None, a2 = None, b2 = None):
+
+        distribution1_ksi = Generation(exponential=distribution1, n = n, param_lambda = param_lambda, a = a1, b = b1)
+
+        """
+        param_n = n
+        if not n:
+            if not param_lambda and not a1 and not b1:
+                distribution1_ksi = Generation(exponential=distribution1)
+            if param_lambda:
+                distribution1_ksi = Generation(exponential=distribution1, param_lambda=param_lambda)
+            if a1 and b1:
+                distribution1_ksi = Generation(exponential=distribution1, a = a1, b = b1)
+        """
         param_n = distribution1_ksi.param_n
-        distribution2_nu = Generation(exponential=distribution2, n=param_n)
+
+        distribution2_nu = Generation(exponential=distribution2, n = param_n, param_lambda = param_mu, a = a2, b = b2)
+
+        """
+        if not param_mu and not a2 and not b2:
+            distribution2_nu = Generation(exponential=distribution2, n=param_n)
+        if param_mu:
+            distribution2_nu = Generation(exponential=distribution2, n=param_n, param_lambda=param_mu)
+        if a2 and b2:
+            distribution2_nu = Generation(exponential=distribution2, n=param_n, a = a2, b = b2)
+        """
+
         y = distribution2_nu.array_of_y
         tau = distribution1_ksi.array_of_tau
         ostream_serviced_reqs = []
@@ -692,44 +744,63 @@ class Lab():
 
         return [array_ostream_serviced_reqs, array_ostream_lost_reqs]
 
-    def exponential_exponential(self, plot_here):
-        return self.distribution1_distribution2(True, True, plot_here)
+    def exponential_exponential(self, plot_here, n = None, param_lambda = None, param_mu = None, a1 = None, b1 = None, a2 = None, b2 = None):
+        return self.distribution1_distribution2(True, True, plot_here, n, param_lambda, param_mu, a1, b1, a2, b2)
 
-    def exponential_uniform(self, plot_here):
-        return self.distribution1_distribution2(True, False, plot_here)
+    def exponential_uniform(self, plot_here, n = None, param_lambda = None, param_mu = None, a1 = None, b1 = None, a2 = None, b2 = None):
+        return self.distribution1_distribution2(True, False, plot_here, n, param_lambda, param_mu, a1, b1, a2, b2)
 
-    def uniform_exponential(self, plot_here):
-        return self.distribution1_distribution2(False, True, plot_here)
+    def uniform_exponential(self, plot_here, n = None, param_lambda = None, param_mu = None, a1 = None, b1 = None, a2 = None, b2 = None):
+        return self.distribution1_distribution2(False, True, plot_here, n, param_lambda, param_mu, a1, b1, a2, b2)
 
-    def uniform_uniform(self, plot_here):
-        return self.distribution1_distribution2(False, False, plot_here)
+    def uniform_uniform(self, plot_here, n = None, param_lambda = None, param_mu = None, a1 = None, b1 = None, a2 = None, b2 = None):
+        return self.distribution1_distribution2(False, False, plot_here, n, param_lambda, param_mu, a1, b1, a2, b2)
 
     def hist_for_all_reqs(self, i):
+        a1 = float(input("Введите параметр a1: "))
+        b1 = float(input("Введите параметр b1: "))
+
+        a2 = float(input("Введите параметр a2: "))
+        b2 = float(input("Введите параметр b2: "))
+
+        print("Исходя из того, что (1/lambda) = (a+b)/2, получаем:")
+        param_lambda = 2 / (a1 + b1)
+        print("Лямбда: " + str(param_lambda))
+        param_mu = 2 / (a2 + b2)
+        print("Мю: " + str(param_mu))
+        n = int(input("Введите параметр n: "))
+        print()
+
         reqs = []
-        reqs.append(self.exponential_exponential(False)[i])
-        reqs.append(self.exponential_uniform(False)[i])
-        reqs.append(self.uniform_exponential(False)[i])
-        reqs.append(self.uniform_uniform(False)[i])
+        reqs.append(self.exponential_exponential(False, n = n, param_lambda = param_lambda, param_mu = param_mu)[i])
+        reqs.append(self.exponential_uniform(False, n = n, param_lambda = param_lambda, a2 = a2, b2 = b2)[i])
+        reqs.append(self.uniform_exponential(False, n = n, a1 = a1, b1 = b1, param_mu = param_mu)[i])
+        reqs.append(self.uniform_uniform(False, n = n, a1 = a1, b1 = b1, a2 = a2, b2 = b2)[i])
 
         iter = 0
         for req in reqs:
             if req:
                 param_m = int(1.44 * log(len(req)) + 1)
-                plt.figure(iter)
+                plt.figure(iter+1)
                 plt.plot()
                 plt.hist(req, bins=param_m, density=True, range=(0, max(req)))
+            iter = iter + 1
         plt.show()
 
     def hist_for_all_serviced_reqs(self):
         self.hist_for_all_reqs(0)
 
-    def hist_for_all_lost_reqs(self, i):
+    def hist_for_all_lost_reqs(self):
         self.hist_for_all_reqs(1)
 
 def Main():
     print()
     lab_work = Lab()
-    lab_work.hist_for_all_serviced_reqs()
+    lab_work.exponential_uniform(True)
+    lab_work.uniform_uniform(True)
+    #lab_work.uniform_analytics()
+    #lab_work.exponential_uniform(True)
+    #lab_work.hist_for_all_serviced_reqs()
 
 if __name__ == "__main__":
     Main()
