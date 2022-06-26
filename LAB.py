@@ -127,7 +127,7 @@ class Generation():
             self.__init_vars_by_input_uniform_data(a, b, n, y)
         """
 
-        self.__print_arrays()
+        #self.__print_arrays()
         print()
 
     def __fill_arrays_again(self):
@@ -177,7 +177,7 @@ class Analyzer:
         self.a = a
         self.b = b
 
-        self.array_of_tau = tau
+        self.array_of_tau = []
         iter = 0
         tau_iter = 0
         for i in range(len(self.array_of_y)):
@@ -489,14 +489,11 @@ class Analyzer:
         upper_limit_t_zero = round(5 / self.param_lambda, 2)
         lower_limit_t_zero = round(3 / self.param_lambda, 2)
         self.t_zero = round(float(input((f'Введите t0 от {lower_limit_t_zero} до {upper_limit_t_zero}: '))),2)
-        print(self.t_zero)
 
     def compute_intervals(self):
         self.intervals = []
         self.m_count_of_intervals = int(max(self.array_of_tau)/self.t_zero) # is m
 
-        print(self.m_count_of_intervals)
-        print(max(self.array_of_tau))
         current_value = 0
         for i in range(int(self.m_count_of_intervals + 1)):
             self.intervals.insert(i, round(current_value, 2))
@@ -639,6 +636,8 @@ class Lab():
 
         analyzer.fth_part_ui()
 
+        print()
+
     def part1(self, array_of_y, array_of_tau, param_n, ostream_serviced_reqs, ostream_lost_reqs):
         current_time = array_of_tau[0] + array_of_y[0]
         ostream_serviced_reqs.append(array_of_tau[0])
@@ -745,12 +744,14 @@ class Lab():
             if array_ostream_serviced_reqs != []:
                 param_m = int(1.44 * log(len(array_ostream_serviced_reqs)) + 1)
                 plt.figure(1)
+                plt.title("Поток П1")
                 plt.plot()
                 plt.hist(array_ostream_serviced_reqs, bins=param_m, density=True, range=(min(array_ostream_serviced_reqs), max(array_ostream_serviced_reqs)))
 
             if array_ostream_lost_reqs != []:
                 param_m = int(1.44 * log(len(array_ostream_lost_reqs)) + 1)
                 plt.figure(2)
+                plt.title("Поток П2")
                 plt.plot()
                 plt.hist(array_ostream_lost_reqs, bins=param_m, density=True, range=(min(array_ostream_lost_reqs), max(array_ostream_lost_reqs)))
 
@@ -796,6 +797,7 @@ class Lab():
             if req:
                 param_m = int(1.44 * log(len(req)) + 1)
                 plt.figure(iter+1)
+                plt.title("Поток П" + str(i+1) + ". Комбинация: " + str(iter+1))
                 plt.plot()
                 plt.hist(req, bins=param_m, density=True, range=(min(req), max(req)))
             iter = iter + 1
@@ -810,12 +812,7 @@ class Lab():
 def Main():
     print()
     lab_work = Lab()
-    lab_work.exponential_exponential_analytics()
-    #lab_work.exponential_uniform(True)
-    #lab_work.uniform_uniform(True)
-    #lab_work.uniform_analytics()
-    #lab_work.exponential_uniform(True)
-    #lab_work.hist_for_all_serviced_reqs()
+    lab_work.hist_for_all_serviced_reqs()
 
 if __name__ == "__main__":
     Main()
