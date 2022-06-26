@@ -127,7 +127,7 @@ class Generation():
             self.__init_vars_by_input_uniform_data(a, b, n, y)
         """
 
-        #self.__print_arrays()
+        self.__print_arrays()
         print()
 
     def __fill_arrays_again(self):
@@ -680,7 +680,9 @@ class Lab():
         ostream_serviced_reqs = []
         ostream_lost_reqs = []
         self.part1(y, tau, param_n, ostream_serviced_reqs, ostream_lost_reqs)
+        print("Анализ выходного потока обслуженных заявок - П1")
         self.__part23(ostream_serviced_reqs, param_lambda, param_n)
+        print("Анализ выходного потока потерянных заявок - П2")
         self.__part23(ostream_lost_reqs, param_lambda, param_n)
 
     def uniform_analytics(self):
@@ -798,9 +800,10 @@ class Lab():
 def Main():
     print()
     lab_work = Lab()
+    lab_work.exponential_exponential_analytics()
     #lab_work.exponential_uniform(True)
     #lab_work.uniform_uniform(True)
-    lab_work.uniform_analytics()
+    #lab_work.uniform_analytics()
     #lab_work.exponential_uniform(True)
     #lab_work.hist_for_all_serviced_reqs()
 
