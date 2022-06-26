@@ -172,11 +172,18 @@ class Analyzer:
     def __init__(self, y, n, tau = None, param_lambda = None, a = None, b = None):
         self.__init_empty_members()
         self.array_of_y = y
-        self.array_of_tau = tau
         self.param_n = n
         self.param_lambda = param_lambda
         self.a = a
         self.b = b
+
+        self.array_of_tau = tau
+        iter = 0
+        tau_iter = 0
+        for i in range(len(self.array_of_y)):
+            tau_iter += self.array_of_y[i]
+            self.array_of_tau.insert(iter, tau_iter)
+            iter += 1
 
     def __init_empty_members(self):
         # For 2nd part
@@ -482,11 +489,14 @@ class Analyzer:
         upper_limit_t_zero = round(5 / self.param_lambda, 2)
         lower_limit_t_zero = round(3 / self.param_lambda, 2)
         self.t_zero = round(float(input((f'Введите t0 от {lower_limit_t_zero} до {upper_limit_t_zero}: '))),2)
+        print(self.t_zero)
 
     def compute_intervals(self):
         self.intervals = []
         self.m_count_of_intervals = int(max(self.array_of_tau)/self.t_zero) # is m
 
+        print(self.m_count_of_intervals)
+        print(max(self.array_of_tau))
         current_value = 0
         for i in range(int(self.m_count_of_intervals + 1)):
             self.intervals.insert(i, round(current_value, 2))
